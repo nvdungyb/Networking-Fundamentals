@@ -1,0 +1,12 @@
+I/O in Java
+
+1) : is built on stream.
+    + Input stream read data.
+    + Output stream write data.
+
+
+2) Stream are synchronous
+    That is, when a program (really a thread) ask a stream to read or write
+    a piece of data, it waits for the data to be read or written before it does anything else.
+
+
