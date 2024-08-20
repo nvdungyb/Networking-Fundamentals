@@ -7,7 +7,7 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public class DigestThread extends Thread {
+public class DigestThread implements Runnable {
     private String filename;
 
     public DigestThread(String filename) {
@@ -54,7 +54,9 @@ public class DigestThread extends Thread {
 
     public static void main(String[] args) {
         String filename = "C:\\Users\\acer\\OneDrive - ptit.edu.vn\\Desktop\\Network Programming\\source code\\networking\\threads\\src\\main\\resources\\sha-resource";
-        DigestThread t = new DigestThread(filename);
+        DigestThread digestThread = new DigestThread(filename);
+
+        Thread t = new Thread(digestThread);
         t.start();
     }
 }
