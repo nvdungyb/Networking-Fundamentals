@@ -1,0 +1,14 @@
+Bài toán đồng bộ - Synchronized
+
+1) wait()
+    + Thread từ bỏ tài nguyên và chuyển sang trạng thái sleep cho đến khi một phương thức khác sử dụng cùng tài nguyên
+    gọi phương thức notify().
+
+
+2) notify()
+    + Đánh thức một thread đã gọi phương thức wait() của cùng một đối tượng (tài nguyên).
+    + Nếu nhiều hơn một Thread -> lựa chọn thread nào để đánh thức.
+
+
+3) notifyAll()
+    + Đánh thức tất cả các thread đã gọi phương thức wait() trong cùng một đối tượng.
