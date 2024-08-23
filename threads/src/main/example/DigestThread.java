@@ -6,16 +6,17 @@ import java.io.IOException;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.*;
 
-public class DigestThread implements Runnable {
+public class DigestThread implements Callable<String> {
     private String filename;
+    private byte[] digest;
 
     public DigestThread(String filename) {
         this.filename = filename;
     }
 
-    @Override
-    public void run() {
+    public String call() {
         try {
             FileInputStream in = new FileInputStream(filename);
             MessageDigest sha = MessageDigest.getInstance("SHA-256");
@@ -23,12 +24,9 @@ public class DigestThread implements Runnable {
 
             while (din.read() != -1) ;
             din.close();
-            byte[] digest = sha.digest();
+            this.digest = sha.digest();
+            return toHex(digest);
 
-            StringBuilder result = new StringBuilder("result");
-            result.append(": ");
-            result.append(toHex(digest));
-            System.out.println(result);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         } catch (FileNotFoundException e) {
@@ -38,9 +36,13 @@ public class DigestThread implements Runnable {
         }
     }
 
+    public byte[] getDigest() {
+        return digest;
+    }
+
     // Theo nguyên lý nào?
     // Không hiểu tại sao từ mảng byte có thể chuyển về kiểu Hex như trên lại đúng?
-    private String toHex(byte[] digest) {
+    private static String toHex(byte[] digest) {
         StringBuilder hexString = new StringBuilder();
         for (byte b : digest) {
             String hex = Integer.toHexString(b & 0xff);
@@ -52,11 +54,24 @@ public class DigestThread implements Runnable {
         return hexString.toString();
     }
 
-    public static void main(String[] args) {
-        String filename = "C:\\Users\\acer\\OneDrive - ptit.edu.vn\\Desktop\\Network Programming\\source code\\networking\\threads\\src\\main\\resources\\sha-resource";
+    public static void print(String filename) throws ExecutionException, InterruptedException {
+        ExecutorService service = Executors.newFixedThreadPool(1);
         DigestThread digestThread = new DigestThread(filename);
 
-        Thread t = new Thread(digestThread);
-        t.start();
+        Future<String> future = service.submit(digestThread);
+
+        StringBuilder result = new StringBuilder("result: ");
+        result.append(filename);
+        result.append(": ");
+        result.append(future.get());
+        System.out.println(result);
+    }
+
+    public static void main(String[] args) throws InterruptedException, ExecutionException {
+        String filename1 = "C:\\Users\\acer\\OneDrive - ptit.edu.vn\\Desktop\\Network Programming\\source code\\networking\\threads\\src\\main\\resources\\sha-resource";
+        String filename2 = "C:\\Users\\acer\\OneDrive - ptit.edu.vn\\Desktop\\Network Programming\\source code\\networking\\threads\\src\\main\\resources\\sha-1-resource";
+
+        print(filename1);
+        print(filename2);
     }
 }
