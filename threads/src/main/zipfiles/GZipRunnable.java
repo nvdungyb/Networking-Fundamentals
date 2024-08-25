@@ -3,7 +3,7 @@ package main.zipfiles;
 import java.io.*;
 import java.util.zip.GZIPOutputStream;
 
-public class GZipRunable implements Runnable {
+public class GZipRunnable implements Runnable {
     private final File input;
 
     public GZipRunable(File file) {
