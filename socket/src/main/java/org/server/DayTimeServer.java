@@ -1,5 +1,7 @@
 package org.server;
 
+import org.util.ParseDateFormat;
+
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -18,7 +20,7 @@ public class DayTimeServer {
                     Writer out = new OutputStreamWriter(connection.getOutputStream());
 
                     Date now = new Date();
-                    out.write(now.toString() + "\r\n");
+                    out.write(ParseDateFormat.format(now) + "\r\n");
                     out.flush();
 
                 } catch (IOException e) {
