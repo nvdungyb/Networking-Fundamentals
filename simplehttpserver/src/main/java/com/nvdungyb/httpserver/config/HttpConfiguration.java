@@ -3,7 +3,7 @@ package com.nvdungyb.httpserver.config;
 import lombok.Data;
 
 @Data
-public class Configuration {
+public class HttpConfiguration {
     private int port;
     private String webroot;
 }
