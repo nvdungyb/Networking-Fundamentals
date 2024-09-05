@@ -1,8 +1,8 @@
 package com.nvdungyb.httpserver.config;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.nvdungyb.httpserver.util.Json;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -10,7 +10,6 @@ import java.io.IOException;
 
 public class ConfigurationManager {
     private static ConfigurationManager myConfigurationManager;
-    private static Configuration myCurrentConfiguration;
 
     private ConfigurationManager() {
     }
@@ -26,7 +25,7 @@ public class ConfigurationManager {
      *
      * @param filePath
      */
-    public void loadConfigurationFile(String filePath) throws IOException {
+    public <T> T loadConfigurationFile(String filePath, Class<T> clazz) {
         FileReader fileReader = null;
         try {
             fileReader = new FileReader(filePath);
@@ -43,27 +42,13 @@ public class ConfigurationManager {
             throw new HttpConfigurationException(ex);
         }
 
-        JsonNode conf = null;
+        ObjectMapper objectMapper = new ObjectMapper();
         try {
-            conf = Json.parse(sb.toString());
-        } catch (IOException ex) {
-            throw new HttpConfigurationException("Error parsing the configuration file.", ex);
+            return objectMapper.readValue(sb.toString(), clazz);
+        } catch (JsonMappingException e) {
+            throw new RuntimeException(e);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
-
-        try {
-            myCurrentConfiguration = Json.fromJson(conf, Configuration.class);
-        } catch (JsonProcessingException ex) {
-            throw new HttpConfigurationException("Error parsing the configuration file, internal.", ex);
-        }
-    }
-
-    /**
-     * Return the current loaded configuration.
-     */
-    public Configuration getCurrentConfiguration() {
-        if (myCurrentConfiguration == null) {
-            throw new HttpConfigurationException("No current configuration set.");
-        }
-        return myCurrentConfiguration;
     }
 }
