@@ -38,8 +38,15 @@ public class HttpParser {
             if (_byte == CR) {
                 _byte = reader.read();
                 if (_byte == LF) {
-                    if (!methodParsed || !requestTargetParsed)
+                    if (!methodParsed || !requestTargetParsed) {
                         throw new HttpParsingException(HttpStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
+                    }
+
+                    try {
+                        request.setHttpVersion(processingDataBuffer.toString());
+                    } catch (BadHttpVersionException ex) {
+                        throw new HttpParsingException(HttpStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
+                    }
                     return;
                 } else {
                     throw new HttpParsingException(HttpStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
@@ -55,7 +62,9 @@ public class HttpParser {
                     processingDataBuffer.delete(0, processingDataBuffer.length());
                     methodParsed = true;
                 } else if (!requestTargetParsed) {
-                    logger.info("Request line target: " + processingDataBuffer.toString());
+                    String target = processingDataBuffer.toString();
+                    logger.info("Request line target: " + target);
+                    request.setRequestTarget(target);
                     processingDataBuffer.delete(0, processingDataBuffer.length());
                     requestTargetParsed = true;
                 } else {
@@ -73,6 +82,5 @@ public class HttpParser {
     }
 
     private void parseBody(InputStreamReader reader, HttpRequest request) {
-
     }
 }
