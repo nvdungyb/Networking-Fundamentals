@@ -1,26 +1,13 @@
 package com.nvdungyb.httpserver.config;
 
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 public class TargetResources {
-    private static TargetResources targetResources;
-    public static HashMap<String, String> resources;
+    public HashMap<String, String> resources;
 
-    private TargetResources() {
-    }
-
-    public static TargetResources getInstance() {
-        if (targetResources == null)
-            targetResources = new TargetResources();
-        return targetResources;
-    }
-
-    public void insertResource(String target, String uri) throws TargetResourcesException {
-        if (!resources.containsKey(target)) {
-            resources.put(target, uri);
-        } else {
-            throw new TargetResourcesException("This " + target + " already exists!");
-        }
+    public TargetResources(HashMap<String, String> resources) {
+        this.resources = resources;
     }
 
     public HashMap<String, String> getResources() {
@@ -29,5 +16,14 @@ public class TargetResources {
 
     public void setResources(HashMap<String, String> resources) {
         this.resources = resources;
+    }
+
+    @Override
+    public String toString() {
+        return "TargetResources{" +
+                "resources=" + resources.keySet().stream()
+                .map(key -> key + ": " + resources.get(key) + ", ")
+                .collect(Collectors.toList())
+                + '}';
     }
 }
