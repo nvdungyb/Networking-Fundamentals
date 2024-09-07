@@ -3,13 +3,8 @@ package com.nvdungyb.httpserver.util;
 import com.nvdungyb.httpserver.config.TargetResources;
 import com.nvdungyb.httpserver.http.HttpStatusCode;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-
 public class ResponseUtil {
-    public static String readFile(String requestTarget, TargetResources targetResources) {
+    public static Object readFile(String requestTarget, TargetResources targetResources) {
         String filePath = null;
         if (targetResources.getResources().containsKey(requestTarget)) {
             filePath = targetResources.getResources().get(requestTarget);
@@ -21,27 +16,11 @@ public class ResponseUtil {
         String fileType = filePath.substring(lastIndexOfDot + 1);
 
         if (fileType.equals("txt")) {
-            return readTextFile(filePath);
+            return new TextFileReader().readFile(filePath);
+        } else if (fileType.equals("jpg")) {
+            return new ImageFileReader().readFile(filePath);
         }
 
         return "";
-    }
-
-    public static String readTextFile(String filePath) {
-        try {
-            InputStreamReader reader = new InputStreamReader(new FileInputStream(filePath));
-            StringBuffer sb = new StringBuffer();
-
-            int character;
-            while ((character = reader.read()) != -1) {
-                sb.append((char) character);
-            }
-
-            return sb.toString();
-        } catch (FileNotFoundException fileNotFoundException) {
-            throw new RuntimeException("File not found!");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 }
