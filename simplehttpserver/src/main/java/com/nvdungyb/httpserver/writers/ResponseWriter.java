@@ -3,10 +3,10 @@ package com.nvdungyb.httpserver.writers;
 import com.nvdungyb.httpserver.config.HttpConfigurationAndResources;
 import com.nvdungyb.httpserver.http.HttpMethod;
 import com.nvdungyb.httpserver.http.HttpRequest;
+import com.nvdungyb.httpserver.util.ImageResponse;
 import com.nvdungyb.httpserver.util.ResponseUtil;
 
 import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.logging.Logger;
@@ -39,13 +39,30 @@ public class ResponseWriter {
 
                     outputStream.write(response.getBytes());
 
-                } else if (object instanceof BufferedImage) {
+                } else if (object instanceof ImageResponse) {
+                    String fileExtension = ((ImageResponse) object).getFileExtension();
+
+                    String contentType;
+                    if (fileExtension.equals("png")) {
+                        contentType = "Content-Type: image/png";
+                    } else if (fileExtension.equals("jpg")) {
+                        contentType = "Content-Type: image/jpeg";
+                    } else if (fileExtension.equals("gif")) {
+                        contentType = "Content-Type: image/gif";
+                    } else {
+                        throw new RuntimeException("Can not response with this file extension: " + fileExtension);
+                    }
+
                     String responseHeader = "HTTP/1.1 200 OK" + CRLF +
-                            "Content-Type: image/jpeg" + CRLF +
-                            CRLF;
+                            contentType + CRLF + CRLF;
+
                     outputStream.write(responseHeader.getBytes());
 
-                    ImageIO.write((BufferedImage) object, "JPG", outputStream);            // Write image to output stream
+                    if (fileExtension.equals("gif")) {
+                        outputStream.write(((ImageResponse) object).getGifData());
+                    } else {
+                        ImageIO.write(((ImageResponse) object).getBufferedImage(), fileExtension, outputStream);            // Write image to output stream
+                    }
                 }
                 outputStream.flush();
             } else {

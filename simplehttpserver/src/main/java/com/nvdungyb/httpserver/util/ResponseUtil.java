@@ -5,7 +5,7 @@ import com.nvdungyb.httpserver.http.HttpStatusCode;
 
 public class ResponseUtil {
     public static Object readFile(String requestTarget, TargetResources targetResources) {
-        String filePath = null;
+        String filePath;
         if (targetResources.getResources().containsKey(requestTarget)) {
             filePath = targetResources.getResources().get(requestTarget);
         } else {
@@ -17,7 +17,7 @@ public class ResponseUtil {
 
         if (fileType.equals("txt")) {
             return new TextFileReader().readFile(filePath);
-        } else if (fileType.equals("jpg")) {
+        } else if (fileType.equals("jpg") || fileType.equals("png") || fileType.equals("gif")) {
             return new ImageFileReader().readFile(filePath);
         }
 
