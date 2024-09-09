@@ -5,6 +5,8 @@ import com.nvdungyb.httpserver.http.HttpMethod;
 import com.nvdungyb.httpserver.http.HttpRequest;
 import com.nvdungyb.httpserver.util.ImageResponse;
 import com.nvdungyb.httpserver.util.ResponseUtil;
+import com.nvdungyb.httpserver.util.TextFileReader;
+import com.nvdungyb.httpserver.util.TextResponse;
 
 import javax.imageio.ImageIO;
 import java.io.IOException;
@@ -21,20 +23,29 @@ public class ResponseWriter {
             String requestTarget = request.getRequestTarget().substring(1);
             if (!requestTarget.equals("favicon.ico") && method.name().equals(HttpMethod.GET.name())) {
                 Object object = ResponseUtil.readFile(requestTarget, configurationAndResources.getTargetResources());
-                if (object instanceof String) {
-                    String fileContents = ((String) object).replace("\n", "<br>");     // replace newline "\n" in file text to <br> tag in file html.
+                if (object instanceof TextResponse) {
+                    TextResponse fileReader = (TextResponse) object;
+                    String fileExtension = fileReader.getFileExtension();
 
-                    String html = "<html> <head> <body> <h1>This page was served using my simple http server.<h1>" +
-                            "<h2> With method: " + request.getMethod() + ", and target uri: " + request.getRequestTarget()
-                            + " With content: " + fileContents
-                            + "</h2> </body> </head> </html>";
+                    String content;
+                    if (fileExtension.equals("txt")) {
+                        String fileContents = fileReader.getFileContent().replace("\n", "<br>");     // replace newline "\n" in file text to <br> tag in file html.
+
+                        content = "<html> <head> <body> <h1>This page was served using my simple http server.<h1>" +
+                                "<h2> With method: " + request.getMethod() + ", and target uri: " + request.getRequestTarget()
+                                + " With content: " + fileContents
+                                + "</h2> </body> </head> </html>";
+                    } else {
+                        // This is the html file content.
+                        content = fileReader.getFileContent();
+                    }
 
                     String response = "HTTP/1.1 200 OK"                                               // Status Line : HTTP_VERSION RESPONSE_CODE RESPONSE_MESSAGE
                             + CRLF +
                             "Content-Type: text/html; charset=UTF-8" + CRLF +
-                            "Content-Length: " + html.getBytes().length + CRLF                        // Header
+                            "Content-Length: " + content.getBytes().length + CRLF                        // Header
                             + CRLF
-                            + html
+                            + content
                             + CRLF + CRLF;
 
                     outputStream.write(response.getBytes());

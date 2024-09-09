@@ -15,7 +15,7 @@ public class ResponseUtil {
         int lastIndexOfDot = filePath.lastIndexOf('.');
         String fileType = filePath.substring(lastIndexOfDot + 1);
 
-        if (fileType.equals("txt")) {
+        if (fileType.equals("txt") || fileType.equals("html")) {
             return new TextFileReader().readFile(filePath);
         } else if (fileType.equals("jpg") || fileType.equals("png") || fileType.equals("gif")) {
             return new ImageFileReader().readFile(filePath);
