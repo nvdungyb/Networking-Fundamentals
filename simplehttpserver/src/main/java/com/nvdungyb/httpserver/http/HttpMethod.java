@@ -3,7 +3,7 @@ package com.nvdungyb.httpserver.http;
 import java.util.Arrays;
 
 public enum HttpMethod {
-    GET, HEAD;
+    GET, HEAD, POST;
 
     public static final int MAX_LENGTH;
 
