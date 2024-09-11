@@ -17,7 +17,7 @@ public class ResponseUtil {
 
         if (fileType.equals("txt") || fileType.equals("html")) {
             return new TextFileReader().readFile(filePath);
-        } else if (fileType.equals("jpg") || fileType.equals("png") || fileType.equals("gif")) {
+        } else if (fileType.equals("jpg") || fileType.equals("jpeg") || fileType.equals("png") || fileType.equals("gif")) {
             return new ImageFileReader().readFile(filePath);
         }
 
