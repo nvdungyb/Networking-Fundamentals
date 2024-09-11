@@ -1,12 +1,16 @@
 package com.nvdungyb.httpserver.http;
 
 import java.util.Arrays;
+import java.util.HashMap;
 
 public class HttpRequest extends HttpMessage {
     private HttpMethod method;
     private String requestTarget;
     private String originalHttpVersion;         // literal from request.
     private HttpVersion bestCompatibleHttpVersion;
+    private HashMap<String, String> header;
+    private String filename;
+    private byte[] data;
 
     HttpRequest() {
     }
@@ -44,5 +48,29 @@ public class HttpRequest extends HttpMessage {
 
     public HttpVersion getBestCompatibleHttpVersion() {
         return this.bestCompatibleHttpVersion;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
+
+    public String getFilename() {
+        return this.filename;
+    }
+
+    public void setData(byte[] data) {
+        this.data = data;
+    }
+
+    public byte[] getData() {
+        return data;
+    }
+
+    public void setHeader(HashMap<String, String> header) {
+        this.header = header;
+    }
+
+    public HashMap<String, String> getHeader() {
+        return this.header;
     }
 }
