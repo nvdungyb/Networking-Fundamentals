@@ -4,6 +4,7 @@ import com.nvdungyb.httpserver.config.HttpConfigurationAndResources;
 import com.nvdungyb.httpserver.http.HttpMethod;
 import com.nvdungyb.httpserver.http.HttpRequest;
 import com.nvdungyb.httpserver.util.ImageResponse;
+import com.nvdungyb.httpserver.util.Json;
 import com.nvdungyb.httpserver.util.ResponseUtil;
 import com.nvdungyb.httpserver.util.TextResponse;
 
@@ -21,14 +22,14 @@ public class ResponseWriter {
         try {
             HttpMethod method = request.getMethod();
             String requestTarget = request.getRequestTarget().substring(1);
+            String content = "";
             if (!requestTarget.equals("favicon.ico")) {
+                Object object = ResponseUtil.readFile(requestTarget, configurationAndResources.getTargetResources());
                 if (method.name().equals(HttpMethod.GET.name())) {
-                    Object object = ResponseUtil.readFile(requestTarget, configurationAndResources.getTargetResources());
                     if (object instanceof TextResponse) {
                         TextResponse fileReader = (TextResponse) object;
                         String fileExtension = fileReader.getFileExtension();
 
-                        String content;
                         if (fileExtension.equals("txt")) {
                             String fileContents = fileReader.getFileContent().replace("\n", "<br>");     // replace newline "\n" in file text to <br> tag in file html.
 
@@ -41,23 +42,13 @@ public class ResponseWriter {
                             content = fileReader.getFileContent();
                         }
 
-                        String response = "HTTP/1.1 200 OK"                                               // Status Line : HTTP_VERSION RESPONSE_CODE RESPONSE_MESSAGE
-                                + CRLF +
-                                "Content-Type: text/html; charset=UTF-8" + CRLF +
-                                "Content-Length: " + content.getBytes().length + CRLF                        // Header
-                                + CRLF
-                                + content
-                                + CRLF + CRLF;
-
-                        outputStream.write(response.getBytes());
-
                     } else if (object instanceof ImageResponse) {
                         String fileExtension = ((ImageResponse) object).getFileExtension();
 
                         String contentType;
                         if (fileExtension.equals("png")) {
                             contentType = "Content-Type: image/png";
-                        } else if (fileExtension.equals("jpg")) {
+                        } else if (fileExtension.equals("jpg") || fileExtension.equals("jpeg")) {
                             contentType = "Content-Type: image/jpeg";
                         } else if (fileExtension.equals("gif")) {
                             contentType = "Content-Type: image/gif";
@@ -75,13 +66,36 @@ public class ResponseWriter {
                         } else {
                             ImageIO.write(((ImageResponse) object).getBufferedImage(), fileExtension, outputStream);            // Write image to output stream
                         }
+
+                        outputStream.flush();
+                        // if server return image file, so have to return here.
+                        return;
                     }
-                    outputStream.flush();
+
                 } else if (method.name().equals(HttpMethod.POST.name())) {
                     String filepath = "simplehttpserver/src/main/resources/target_resources/uploads/" + request.getFilename();
                     FileOutputStream fileOutputStream = new FileOutputStream(filepath);
                     fileOutputStream.write(request.getData());
+
+                    // return upload-success html file
+                    TextResponse textResponse = (TextResponse) object;
+                    content = textResponse.getFileContent();
+                    // Write filename and filepath to json file for handle get method (http request).
+                    if (!Json.writeToJsonFile(request.getFilename(), filepath)) {
+                        logger.info("Can not write " + filepath + " to json file!. Cause filename already exits.");
+                    }
                 }
+
+                String response = "HTTP/1.1 200 OK"                                               // Status Line : HTTP_VERSION RESPONSE_CODE RESPONSE_MESSAGE
+                        + CRLF +
+                        "Content-Type: text/html; charset=UTF-8" + CRLF +
+                        "Content-Length: " + content.getBytes().length + CRLF                        // Header
+                        + CRLF
+                        + content
+                        + CRLF + CRLF;
+
+                outputStream.write(response.getBytes());
+
             } else {
                 logger.info("/favicon.ico doesn't excepted.");
             }

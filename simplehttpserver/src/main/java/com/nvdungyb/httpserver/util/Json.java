@@ -1,7 +1,13 @@
 package com.nvdungyb.httpserver.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.*;
+import com.nvdungyb.httpserver.config.HttpConfigurationAndResources;
+import com.nvdungyb.httpserver.config.TargetResources;
+
+import java.io.File;
+import java.util.HashMap;
 
 public class Json {
     private static ObjectMapper myObjectMapper = defaultObjectMapper();
@@ -41,4 +47,29 @@ public class Json {
         return objectWriter.writeValueAsString(o);
     }
 
+    public static boolean writeToJsonFile(String filename, String filePath) {
+        HashMap<String, String> targetHash;
+        String jsonFilePath = "simplehttpserver/src/main/resources/request_target.json";
+        ObjectMapper objectMapper = new ObjectMapper();
+        File file = new File(jsonFilePath);
+
+        try {
+            targetHash = objectMapper.readValue(file, new TypeReference<>() {
+            });
+
+            int indexOfDot = filename.lastIndexOf('.');
+            String target = filename.substring(0, indexOfDot).toLowerCase().replaceAll("\\s+", "-");
+            if (targetHash.containsKey(target))
+                return false;
+            targetHash.put(target, filePath);
+            objectMapper.writerWithDefaultPrettyPrinter().writeValue(file, targetHash);
+
+            // Update targetResources instance.
+            TargetResources targetResources = HttpConfigurationAndResources.getInstance().getTargetResources();
+            targetResources.getResources().put(target, filePath);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
 }
